@@ -86,71 +86,143 @@ const downloadImage = async (imageUrl) => {
 
   /* --- ส่วนการแสดงผล (JSX) --- */
 return (
-  <div style={{ padding: '20px', maxWidth: '600px', margin: 'auto' }}>
-    <h2>Gemini Chatbot</h2>
-    
-    {/* ส่วนกล่องข้อความแชท */}
-    <div style={{ height: '400px', overflowY: 'scroll', border: '1px solid #ccc', padding: '10px', borderRadius: '8px', marginBottom: '10px' }}>
-      
-      {/* ตรงนี้คือ .map() ที่คุณถามถึงครับ */}
-      {messages.map((msg, i) => (
-  <div key={i} style={{ textAlign: msg.role === 'user' ? 'right' : 'left', marginBottom: '15px' }}>
+  <div style={{ 
+    minHeight: '100vh', 
+    backgroundColor: '#f0f2f5', 
+    backgroundImage: 'radial-gradient(#d1d5db 1px, transparent 1px)', 
+    backgroundSize: '20px 20px',
+    padding: '40px 20px', 
+    fontFamily: "'Inter', sans-serif" 
+  }}>
     <div style={{ 
-      display: 'inline-block', 
-      padding: '8px 12px', 
-      borderRadius: '15px', 
-      backgroundColor: msg.role === 'user' ? '#007bff' : '#f1f1f1',
-      color: msg.role === 'user' ? 'white' : 'black'
+      maxWidth: '800px', 
+      margin: 'auto', 
+      backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+      borderRadius: '20px', 
+      boxShadow: '0 10px 25px rgba(0,0,0,0.1)', 
+      overflow: 'hidden',
+      display: 'flex',
+      flexDirection: 'column',
+      height: '80vh'
     }}>
-      <strong>{msg.role}: </strong>
       
-      {/* --- เริ่มเปลี่ยนโค้ดตั้งแต่ตรงนี้เป็นต้นไป --- */}
-      {msg.isImage ? (
-        <div style={{ marginTop: '5px', textAlign: 'center' }}>
-          <img 
-            src={msg.text} 
-            alt="AI Design" 
-            style={{ maxWidth: '100%', borderRadius: '10px', display: 'block', marginBottom: '10px' }} 
+      {/* Header */}
+      <div style={{ padding: '20px', backgroundColor: '#007bff', color: 'white', textAlign: 'center' }}>
+        <h2 style={{ margin: 0, fontSize: '24px', letterSpacing: '1px' }}>✨ TileAi Designer</h2>
+        <p style={{ margin: '5px 0 0', opacity: 0.8, fontSize: '14px' }}>ออกแบบลายเซรามิกด้วย AI อัจฉริยะ</p>
+      </div>
+
+      {/* Chat Area */}
+      <div style={{ 
+        flex: 1, 
+        overflowY: 'auto', 
+        padding: '20px', 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '15px',
+        backgroundColor: '#ffffff' 
+      }}>
+        {messages.length === 0 && (
+          <div style={{ textAlign: 'center', marginTop: '50px', color: '#9ca3af' }}>
+            <div style={{ fontSize: '50px' }}>🎨</div>
+            <p>ลองพิมพ์ว่า "วาดรูปลายเซรามิกสีน้ำเงินขาว" ดูสิ!</p>
+          </div>
+        )}
+
+        {messages.map((msg, i) => (
+          <div key={i} style={{ 
+            display: 'flex', 
+            justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' 
+          }}>
+            <div style={{ 
+              maxWidth: '75%', 
+              padding: '12px 18px', 
+              borderRadius: msg.role === 'user' ? '20px 20px 0 20px' : '20px 20px 20px 0', 
+              backgroundColor: msg.role === 'user' ? '#007bff' : '#f3f4f6',
+              color: msg.role === 'user' ? 'white' : '#1f2937',
+              boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+              lineHeight: '1.5'
+            }}>
+              <strong style={{ display: 'block', fontSize: '12px', marginBottom: '4px', opacity: 0.7 }}>
+                {msg.role === 'user' ? 'คุณ' : 'TileAi Bot'}
+              </strong>
+              
+              {msg.isImage ? (
+                <div style={{ marginTop: '10px', textAlign: 'center' }}>
+                  <img 
+                    src={msg.text} 
+                    alt="AI Design" 
+                    style={{ width: '100%', borderRadius: '12px', border: '2px solid #fff', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} 
+                  />
+                  <button 
+                    onClick={() => downloadImage(msg.text)}
+                    style={{
+                      marginTop: '12px',
+                      backgroundColor: '#10b981',
+                      color: 'white',
+                      border: 'none',
+                      padding: '8px 20px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      transition: '0.3s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      margin: '12px auto 0'
+                    }}
+                  >
+                    💾 ดาวน์โหลดผลงาน
+                  </button>
+                </div>
+              ) : (
+                <span style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Input Area */}
+      <div style={{ padding: '20px', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <input 
+            value={input} 
+            onChange={(e) => setInput(e.target.value)} 
+            onKeyDown={(e) => e.key === 'Enter' && sendMessage()} 
+            style={{ 
+              flex: 1, 
+              padding: '12px 20px', 
+              borderRadius: '25px', 
+              border: '1px solid #d1d5db', 
+              outline: 'none',
+              fontSize: '16px'
+            }} 
+            placeholder="พิมพ์คำสั่งออกแบบ เช่น 'ขอดูลายดอกไม้สีทอง'..."
           />
-          {/* เพิ่มปุ่มดาวน์โหลดใต้รูปภาพ */}
           <button 
-            onClick={() => downloadImage(msg.text)}
-            style={{
-              backgroundColor: '#28a745',
-              color: 'white',
-              border: 'none',
-              padding: '8px 15px',
-              borderRadius: '5px',
+            onClick={sendMessage} 
+            style={{ 
+              backgroundColor: '#007bff', 
+              color: 'white', 
+              border: 'none', 
+              width: '50px',
+              height: '50px',
+              borderRadius: '50%',
               cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 'bold'
+              fontSize: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: '0.2s',
+              boxShadow: '0 4px 10px rgba(0,123,255,0.3)'
             }}
           >
-            💾 ดาวน์โหลดรูปภาพ
+            🚀
           </button>
         </div>
-      ) : (
-        <span>{msg.text}</span>
-      )}
-      {/* --- สิ้นสุดส่วนที่ต้องเปลี่ยน --- */}
-
-    </div>
-  </div>
-))}
-      {/* สิ้นสุด .map() */}
-
-    </div>
-
-    {/* ส่วนช่องกรอกข้อความ */}
-    <div style={{ display: 'flex', gap: '5px' }}>
-      <input 
-        value={input} 
-        onChange={(e) => setInput(e.target.value)} 
-        onKeyDown={(e) => e.key === 'Enter' && sendMessage()} // กด Enter เพื่อส่งได้
-        style={{ flex: 1, padding: '8px' }} 
-        placeholder="พิมพ์ข้อความ หรือ 'วาดรูป...'"
-      />
-      <button onClick={sendMessage} style={{ padding: '8px 15px', cursor: 'pointer' }}>Send</button>
+      </div>
     </div>
   </div>
 );
