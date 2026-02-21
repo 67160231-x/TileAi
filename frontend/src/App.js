@@ -66,6 +66,23 @@ function App() {
     setMessages((prev) => [...prev, { role: 'bot', text: 'ขออภัยครับ เกิดข้อผิดพลาดในการเชื่อมต่อ' }]);
   }
 };
+const downloadImage = async (imageUrl) => {
+  try {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `tile-design-${Date.now()}.png`; // ตั้งชื่อไฟล์ตามเวลา
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Download failed:', error);
+    alert('ไม่สามารถดาวน์โหลดรูปภาพได้ในขณะนี้');
+  }
+};
 
   /* --- ส่วนการแสดงผล (JSX) --- */
 return (
@@ -77,28 +94,49 @@ return (
       
       {/* ตรงนี้คือ .map() ที่คุณถามถึงครับ */}
       {messages.map((msg, i) => (
-        <div key={i} style={{ textAlign: msg.role === 'user' ? 'right' : 'left', marginBottom: '15px' }}>
-          <div style={{ 
-            display: 'inline-block', 
-            padding: '8px 12px', 
-            borderRadius: '15px', 
-            backgroundColor: msg.role === 'user' ? '#007bff' : '#f1f1f1',
-            color: msg.role === 'user' ? 'white' : 'black'
-          }}>
-            <strong>{msg.role}: </strong>
-            
-            {/* เช็คว่าถ้าเป็นรูปภาพให้แสดง <img> ถ้าไม่ใช่ให้แสดง <p> */}
-            {msg.isImage ? (
-              <div style={{ marginTop: '5px' }}>
-                <img src={msg.text} alt="AI" style={{ maxWidth: '100%', borderRadius: '10px' }} />
-              </div>
-            ) : (
-              <span>{msg.text}</span>
-            )}
-
-          </div>
+  <div key={i} style={{ textAlign: msg.role === 'user' ? 'right' : 'left', marginBottom: '15px' }}>
+    <div style={{ 
+      display: 'inline-block', 
+      padding: '8px 12px', 
+      borderRadius: '15px', 
+      backgroundColor: msg.role === 'user' ? '#007bff' : '#f1f1f1',
+      color: msg.role === 'user' ? 'white' : 'black'
+    }}>
+      <strong>{msg.role}: </strong>
+      
+      {/* --- เริ่มเปลี่ยนโค้ดตั้งแต่ตรงนี้เป็นต้นไป --- */}
+      {msg.isImage ? (
+        <div style={{ marginTop: '5px', textAlign: 'center' }}>
+          <img 
+            src={msg.text} 
+            alt="AI Design" 
+            style={{ maxWidth: '100%', borderRadius: '10px', display: 'block', marginBottom: '10px' }} 
+          />
+          {/* เพิ่มปุ่มดาวน์โหลดใต้รูปภาพ */}
+          <button 
+            onClick={() => downloadImage(msg.text)}
+            style={{
+              backgroundColor: '#28a745',
+              color: 'white',
+              border: 'none',
+              padding: '8px 15px',
+              borderRadius: '5px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 'bold'
+            }}
+          >
+            💾 ดาวน์โหลดรูปภาพ
+          </button>
         </div>
-      ))}
+      ) : (
+        <span>{msg.text}</span>
+      )}
+      {/* --- สิ้นสุดส่วนที่ต้องเปลี่ยน --- */}
+
+    </div>
+  </div>
+))}
       {/* สิ้นสุด .map() */}
 
     </div>
