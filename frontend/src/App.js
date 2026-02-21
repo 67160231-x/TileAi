@@ -11,7 +11,7 @@ function App() {
     const interval = setInterval(async () => {
       try {
         console.log("Checking image status for ID:", id);
-        const res = await axios.get(`http://localhost:5000/get-image/${id}`);
+        const res = await axios.get(`https://tile-ai-api.vercel.app/get-image/${id}`);
 
         if (res.data.status === 'COMPLETE') {
           // ถ้าวาดเสร็จแล้ว ให้หยุดการ Polling
@@ -48,7 +48,7 @@ function App() {
       currentInput.includes("ขอดูรูป")
     ) {
       // ส่งไปที่ API วาดรูป
-      const res = await axios.post('http://localhost:5000/generate-image', { prompt: currentInput });
+      const res = await axios.post('https://tile-ai-api.vercel.app/generate-image', { prompt: currentInput });
       pollImageStatus(res.data.generationId);
       
       setMessages((prev) => [...prev, { 
@@ -58,7 +58,7 @@ function App() {
 
     } else {
       // ถ้าไม่ใช่การวาดรูป ให้ส่งไปถาม Gemini (แนะนำลาย/ราคา)
-      const res = await axios.post('http://localhost:5000/chat', { prompt: currentInput });
+      const res = await axios.post('https://tile-ai-api.vercel.app/chat', { prompt: currentInput });
       setMessages((prev) => [...prev, { role: 'bot', text: res.data.text }]);
     }
   } catch (err) {
