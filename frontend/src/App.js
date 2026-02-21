@@ -87,141 +87,162 @@ const downloadImage = async (imageUrl) => {
   /* --- ส่วนการแสดงผล (JSX) --- */
 return (
   <div style={{ 
-    minHeight: '100vh', 
-    backgroundColor: '#f0f2f5', 
-    backgroundImage: 'radial-gradient(#d1d5db 1px, transparent 1px)', 
-    backgroundSize: '20px 20px',
-    padding: '40px 20px', 
-    fontFamily: "'Inter', sans-serif" 
+    display: 'flex', 
+    flexDirection: 'column', 
+    height: '100vh', 
+    backgroundColor: '#ffffff', // พื้นหลังขาวแบบ ChatGPT
+    color: '#343541', 
+    fontFamily: "'Saira', 'Helvetica', sans-serif" 
   }}>
+    
+    {/* Header แบบเรียบๆ */}
     <div style={{ 
-      maxWidth: '800px', 
-      margin: 'auto', 
-      backgroundColor: 'rgba(255, 255, 255, 0.9)', 
-      borderRadius: '20px', 
-      boxShadow: '0 10px 25px rgba(0,0,0,0.1)', 
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column',
-      height: '80vh'
+      padding: '15px', 
+      textAlign: 'center', 
+      borderBottom: '1px solid #e5e5e5',
+      fontWeight: '600',
+      fontSize: '1.1rem'
     }}>
-      
-      {/* Header */}
-      <div style={{ padding: '20px', backgroundColor: '#007bff', color: 'white', textAlign: 'center' }}>
-        <h2 style={{ margin: 0, fontSize: '24px', letterSpacing: '1px' }}>✨ TileAi Designer</h2>
-        <p style={{ margin: '5px 0 0', opacity: 0.8, fontSize: '14px' }}>ออกแบบลายเซรามิกด้วย AI อัจฉริยะ</p>
-      </div>
+      TileAi 4.0
+    </div>
 
-      {/* Chat Area */}
-      <div style={{ 
-        flex: 1, 
-        overflowY: 'auto', 
-        padding: '20px', 
-        display: 'flex', 
-        flexDirection: 'column', 
-        gap: '15px',
-        backgroundColor: '#ffffff' 
-      }}>
-        {messages.length === 0 && (
-          <div style={{ textAlign: 'center', marginTop: '50px', color: '#9ca3af' }}>
-            <div style={{ fontSize: '50px' }}>🎨</div>
-            <p>ลองพิมพ์ว่า "วาดรูปลายเซรามิกสีน้ำเงินขาว" ดูสิ!</p>
-          </div>
-        )}
-
-        {messages.map((msg, i) => (
+    {/* Chat History Area */}
+    <div style={{ 
+      flex: 1, 
+      overflowY: 'auto', 
+      paddingBottom: '100px' // กันปุ่มบังข้อความล่างสุด
+    }}>
+      {messages.length === 0 ? (
+        <div style={{ 
+          height: '100%', 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center', 
+          fontSize: '1.5rem', 
+          fontWeight: '600', 
+          color: '#c5c5d2' 
+        }}>
+          How can I help you design today?
+        </div>
+      ) : (
+        messages.map((msg, i) => (
           <div key={i} style={{ 
-            display: 'flex', 
-            justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' 
+            backgroundColor: msg.role === 'user' ? '#ffffff' : '#f7f7f8', // สลับสีพื้นหลังแบบ ChatGPT รุ่นก่อน
+            borderBottom: '1px solid #e5e5e5',
+            padding: '25px 20px'
           }}>
             <div style={{ 
-              maxWidth: '75%', 
-              padding: '12px 18px', 
-              borderRadius: msg.role === 'user' ? '20px 20px 0 20px' : '20px 20px 20px 0', 
-              backgroundColor: msg.role === 'user' ? '#007bff' : '#f3f4f6',
-              color: msg.role === 'user' ? 'white' : '#1f2937',
-              boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
-              lineHeight: '1.5'
+              maxWidth: '768px', 
+              margin: 'auto', 
+              display: 'flex', 
+              gap: '20px',
+              alignItems: 'flex-start'
             }}>
-              <strong style={{ display: 'block', fontSize: '12px', marginBottom: '4px', opacity: 0.7 }}>
-                {msg.role === 'user' ? 'คุณ' : 'TileAi Bot'}
-              </strong>
-              
-              {msg.isImage ? (
-                <div style={{ marginTop: '10px', textAlign: 'center' }}>
-                  <img 
-                    src={msg.text} 
-                    alt="AI Design" 
-                    style={{ width: '100%', borderRadius: '12px', border: '2px solid #fff', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} 
-                  />
-                  <button 
-                    onClick={() => downloadImage(msg.text)}
-                    style={{
-                      marginTop: '12px',
-                      backgroundColor: '#10b981',
-                      color: 'white',
-                      border: 'none',
-                      padding: '8px 20px',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      transition: '0.3s',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      margin: '12px auto 0'
-                    }}
-                  >
-                    💾 ดาวน์โหลดผลงาน
-                  </button>
-                </div>
-              ) : (
-                <span style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</span>
-              )}
+              {/* Avatar Icon */}
+              <div style={{ 
+                width: '30px', 
+                height: '30px', 
+                borderRadius: '2px', 
+                backgroundColor: msg.role === 'user' ? '#5436da' : '#19c37d', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '12px',
+                flexShrink: 0
+              }}>
+                {msg.role === 'user' ? 'U' : 'AI'}
+              </div>
+
+              {/* Message Content */}
+              <div style={{ flex: 1, lineHeight: '1.6', fontSize: '16px' }}>
+                {msg.isImage ? (
+                  <div style={{ marginTop: '10px' }}>
+                    <img 
+                      src={msg.text} 
+                      alt="AI Design" 
+                      style={{ maxWidth: '100%', borderRadius: '8px', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }} 
+                    />
+                    <button 
+                      onClick={() => downloadImage(msg.text)}
+                      style={{
+                        marginTop: '15px',
+                        backgroundColor: 'transparent',
+                        border: '1px solid #d9d9e3',
+                        padding: '5px 12px',
+                        borderRadius: '5px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px'
+                      }}
+                    >
+                      💾 Save Image
+                    </button>
+                  </div>
+                ) : (
+                  <span style={{ whiteSpace: 'pre-wrap' }}>{msg.text}</span>
+                )}
+              </div>
             </div>
           </div>
-        ))}
-      </div>
+        ))
+      )}
+    </div>
 
-      {/* Input Area */}
-      <div style={{ padding: '20px', borderTop: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <input 
-            value={input} 
-            onChange={(e) => setInput(e.target.value)} 
-            onKeyDown={(e) => e.key === 'Enter' && sendMessage()} 
-            style={{ 
-              flex: 1, 
-              padding: '12px 20px', 
-              borderRadius: '25px', 
-              border: '1px solid #d1d5db', 
-              outline: 'none',
-              fontSize: '16px'
-            }} 
-            placeholder="พิมพ์คำสั่งออกแบบ เช่น 'ขอดูลายดอกไม้สีทอง'..."
-          />
-          <button 
-            onClick={sendMessage} 
-            style={{ 
-              backgroundColor: '#007bff', 
-              color: 'white', 
-              border: 'none', 
-              width: '50px',
-              height: '50px',
-              borderRadius: '50%',
-              cursor: 'pointer',
-              fontSize: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: '0.2s',
-              boxShadow: '0 4px 10px rgba(0,123,255,0.3)'
-            }}
-          >
-            🚀
-          </button>
-        </div>
+    {/* Input Area - วางลอยด้านล่าง */}
+    <div style={{ 
+      position: 'fixed', 
+      bottom: 0, 
+      left: 0, 
+      right: 0, 
+      background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 50%)',
+      padding: '20px'
+    }}>
+      <div style={{ 
+        maxWidth: '768px', 
+        margin: 'auto', 
+        position: 'relative',
+        boxShadow: '0 0 15px rgba(0,0,0,0.1)',
+        borderRadius: '12px'
+      }}>
+        <input 
+          value={input} 
+          onChange={(e) => setInput(e.target.value)} 
+          onKeyDown={(e) => e.key === 'Enter' && sendMessage()} 
+          style={{ 
+            width: '100%', 
+            padding: '14px 45px 14px 16px', 
+            borderRadius: '12px', 
+            border: '1px solid #e5e5e5', 
+            outline: 'none',
+            fontSize: '16px',
+            boxSizing: 'border-box'
+          }} 
+          placeholder="Message TileAi..."
+        />
+        <button 
+          onClick={sendMessage} 
+          style={{ 
+            position: 'absolute', 
+            right: '10px', 
+            top: '50%', 
+            transform: 'translateY(-50%)',
+            backgroundColor: input ? '#19c37d' : 'transparent', 
+            color: input ? 'white' : '#d9d9e3', 
+            border: 'none', 
+            borderRadius: '5px',
+            padding: '5px',
+            cursor: 'pointer',
+            transition: '0.3s'
+          }}
+        >
+          <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+        </button>
+      </div>
+      <div style={{ textAlign: 'center', fontSize: '12px', color: '#8e8ea0', marginTop: '10px' }}>
+        TileAi can make mistakes. Check important info.
       </div>
     </div>
   </div>
