@@ -5,6 +5,7 @@ function App() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [area, setArea] = useState(''); // ถ้าไม่ประกาศตรงนี้ โค้ดใน else จะหาค่า area ไม่เจอ
+  const API_BASE_URL = "https://tile-ai-omega.vercel.app";
 
   // --- 1. วางฟังก์ชัน Polling ไว้ตรงนี้ ---
   const pollImageStatus = (id) => {
@@ -12,7 +13,7 @@ function App() {
     const interval = setInterval(async () => {
       try {
         console.log("Checking image status for ID:", id);
-        const res = await axios.get(`https://tile-ai-api.vercel.app/get-image/${id}`);
+        const res = await axios.get(`${API_BASE_URL}/get-image/${id}`);
 
         if (res.data.status === 'COMPLETE') {
           // ถ้าวาดเสร็จแล้ว ให้หยุดการ Polling
@@ -51,7 +52,7 @@ function App() {
       // ปรับ Prompt ให้เจนเป็นรูปห้อง (เพื่อให้หัวหน้าว้าว)
       const interiorPrompt = `Photorealistic interior view of a modern empty room, the floor is fully covered with seamless ${currentInput} ceramic tiles, 8k resolution, architectural photography, bright natural lighting, highly detailed floor texture`;
 
-      const res = await axios.post('https://tile-ai-api.vercel.app/generate-image', { 
+      const res = await axios.post('${API_BASE_URL}/generate-image', { 
         prompt: interiorPrompt 
       });
 
@@ -79,7 +80,7 @@ function App() {
       `;
 
       // ส่งไปหา Gemini
-      const res = await axios.post('https://tile-ai-api.vercel.app/chat', { 
+      const res = await axios.post('${API_BASE_URL}/chat', { 
         prompt: pricingInstruction + "\n\nลูกค้าถามว่า: " + currentInput 
       });
       
