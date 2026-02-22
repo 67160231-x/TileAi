@@ -4,6 +4,7 @@ import axios from 'axios';
 function App() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
+  const [area, setArea] = useState(''); // ถ้าไม่ประกาศตรงนี้ โค้ดใน else จะหาค่า area ไม่เจอ
 
   // --- 1. วางฟังก์ชัน Polling ไว้ตรงนี้ ---
   const pollImageStatus = (id) => {
@@ -63,7 +64,7 @@ function App() {
 
     // --- ส่วนที่ 2: ถ้าเป็นการ "พูดคุย/ถามราคา" (Gemini) ---
     } else {
-      // เพิ่มข้อมูลราคา (Context) เข้าไปตรงนี้ เพื่อให้บอทฉลาดขึ้น
+      // เพิ่มการเช็คค่า area เข้าไปในคำสั่ง
       const pricingInstruction = `
         คุณคือผู้เชี่ยวชาญด้านกระเบื้องเซรามิกของ TileAi 
         ข้อมูลราคาสำหรับประเมินให้ลูกค้า:
@@ -71,10 +72,13 @@ function App() {
         - ลายไม้/ลายหินอ่อน: 350-550 บาท/ตร.ม.
         - ลายพรีเมียม/ลายไทยเบญจรงค์: 800-1,500 บาท/ตร.ม.
         - ค่าแรงปูพื้น: 200-300 บาท/ตร.ม.
-        คำแนะนำ: ตอบอย่างสุภาพ ถ้าลูกค้าถามราคาให้ลองคำนวณคร่าวๆ ให้เขาด้วย
+        
+        ${area ? `สำคัญมาก: ตอนนี้ลูกค้ากรอกพื้นที่มาแล้วคือ ${area} ตารางเมตร ช่วยคำนวณราคาสินค้าและค่าแรงรวมให้เขาด้วย` : `หมายเหตุ: ลูกค้ายังไม่ได้ระบุพื้นที่ ถ้าเขาถามราคาให้ประเมินเป็นราคาต่อ ตร.ม.`}
+        
+        คำแนะนำ: ตอบอย่างสุภาพ และสรุปงบประมาณให้ชัดเจน
       `;
 
-      // ส่งทั้งคำสั่งราคา และ สิ่งที่ลูกค้าพิมพ์ไปหา Gemini
+      // ส่งไปหา Gemini
       const res = await axios.post('https://tile-ai-api.vercel.app/chat', { 
         prompt: pricingInstruction + "\n\nลูกค้าถามว่า: " + currentInput 
       });
@@ -214,59 +218,89 @@ return (
     </div>
 
     {/* Input Area - วางลอยด้านล่าง */}
+<div style={{ 
+  position: 'fixed', 
+  bottom: 0, 
+  left: 0, 
+  right: 0, 
+  background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 100%)',
+  padding: '20px'
+}}>
+  <div style={{ maxWidth: '768px', margin: 'auto' }}>
+    
+    {/* --- ส่วนที่เพิ่ม: กล่องคำนวณพื้นที่ --- */}
     <div style={{ 
-      position: 'fixed', 
-      bottom: 0, 
-      left: 0, 
-      right: 0, 
-      background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 50%)',
-      padding: '20px'
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: '10px', 
+      marginBottom: '10px',
+      padding: '0 5px'
     }}>
-      <div style={{ 
-        maxWidth: '768px', 
-        margin: 'auto', 
-        position: 'relative',
-        boxShadow: '0 0 15px rgba(0,0,0,0.1)',
-        borderRadius: '12px'
-      }}>
-        <input 
-          value={input} 
-          onChange={(e) => setInput(e.target.value)} 
-          onKeyDown={(e) => e.key === 'Enter' && sendMessage()} 
-          style={{ 
-            width: '100%', 
-            padding: '14px 45px 14px 16px', 
-            borderRadius: '12px', 
-            border: '1px solid #e5e5e5', 
-            outline: 'none',
-            fontSize: '16px',
-            boxSizing: 'border-box'
-          }} 
-          placeholder="Message TileAi..."
-        />
-        <button 
-          onClick={sendMessage} 
-          style={{ 
-            position: 'absolute', 
-            right: '10px', 
-            top: '50%', 
-            transform: 'translateY(-50%)',
-            backgroundColor: input ? '#19c37d' : 'transparent', 
-            color: input ? 'white' : '#d9d9e3', 
-            border: 'none', 
-            borderRadius: '5px',
-            padding: '5px',
-            cursor: 'pointer',
-            transition: '0.3s'
-          }}
-        >
-          <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-        </button>
-      </div>
-      <div style={{ textAlign: 'center', fontSize: '12px', color: '#8e8ea0', marginTop: '10px' }}>
-        TileAi can make mistakes. Check important info.
-      </div>
+      <label style={{ fontSize: '13px', color: '#565869', fontWeight: '600' }}>พื้นที่สำหรับคำนวณราคา:</label>
+      <input 
+        type="number" 
+        value={area} 
+        onChange={(e) => setArea(e.target.value)} 
+        placeholder="ระบุตัวเลข" 
+        style={{ 
+          width: '80px', 
+          padding: '6px 10px', 
+          borderRadius: '8px', 
+          border: '1px solid #e5e5e5',
+          outline: 'none',
+          fontSize: '14px'
+        }} 
+      />
+      <span style={{ fontSize: '13px', color: '#565869' }}>ตร.ม.</span>
     </div>
+
+    {/* ส่วนกล่องแชทเดิมของคุณ */}
+    <div style={{ 
+      position: 'relative',
+      boxShadow: '0 0 15px rgba(0,0,0,0.1)',
+      borderRadius: '12px'
+    }}>
+      <input 
+        value={input} 
+        onChange={(e) => setInput(e.target.value)} 
+        onKeyDown={(e) => e.key === 'Enter' && sendMessage()} 
+        style={{ 
+          width: '100%', 
+          padding: '14px 45px 14px 16px', 
+          borderRadius: '12px', 
+          border: '1px solid #e5e5e5', 
+          outline: 'none',
+          fontSize: '16px',
+          boxSizing: 'border-box',
+          backgroundColor: '#fff'
+        }} 
+        placeholder="Message TileAi..."
+      />
+      <button 
+        onClick={sendMessage} 
+        style={{ 
+          position: 'absolute', 
+          right: '10px', 
+          top: '50%', 
+          transform: 'translateY(-50%)',
+          backgroundColor: input ? '#19c37d' : 'transparent', 
+          color: input ? 'white' : '#d9d9e3', 
+          border: 'none', 
+          borderRadius: '5px',
+          padding: '5px',
+          cursor: 'pointer',
+          transition: '0.3s'
+        }}
+      >
+        <svg stroke="currentColor" fill="none" strokeWidth="2" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </div>
+
+    <div style={{ textAlign: 'center', fontSize: '12px', color: '#8e8ea0', marginTop: '10px' }}>
+      TileAi can make mistakes. Check important info.
+    </div>
+  </div>
+</div>
   </div>
 );
 }
