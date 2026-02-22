@@ -31,7 +31,7 @@ function App() {
   };
 
   // --- 2. ฟังก์ชันส่งข้อความหลัก ---
-  const sendMessage = async () => {
+ const sendMessage = async () => {
   if (!input) return;
   
   const userMessage = { role: 'user', text: input };
@@ -40,38 +40,54 @@ function App() {
   setInput('');
 
   try {
-    // --- จุดที่แก้ไข: ปรับเงื่อนไขให้เข้ากับเว็บเซรามิก ---
+    // --- ส่วนที่ 1: ตรวจสอบว่าผู้ใช้สั่งให้ "วาดรูป" หรือไม่ ---
     if (
-  currentInput.includes("วาด") || 
-  currentInput.includes("ออกแบบ") || 
-  currentInput.includes("ดูลาย") ||
-  currentInput.includes("ขอดูรูป")
-) {
-  // 1. สร้างคำสั่งใหม่ที่ "บังคับ" ให้ AI วาดรูปห้อง
-  const interiorPrompt = `Photorealistic interior view of a modern empty room, the floor is fully covered with seamless ${currentInput} ceramic tiles, 8k resolution, architectural photography, bright natural lighting, highly detailed floor texture`;
+      currentInput.includes("วาด") || 
+      currentInput.includes("ออกแบบ") || 
+      currentInput.includes("ดูลาย") ||
+      currentInput.includes("ขอดูรูป")
+    ) {
+      // ปรับ Prompt ให้เจนเป็นรูปห้อง (เพื่อให้หัวหน้าว้าว)
+      const interiorPrompt = `Photorealistic interior view of a modern empty room, the floor is fully covered with seamless ${currentInput} ceramic tiles, 8k resolution, architectural photography, bright natural lighting, highly detailed floor texture`;
 
-  // 2. ส่ง interiorPrompt ไปที่ API แทนที่ currentInput เดิม
-  const res = await axios.post('https://tile-ai-api.vercel.app/generate-image', { 
-    prompt: interiorPrompt 
-  });
+      const res = await axios.post('https://tile-ai-api.vercel.app/generate-image', { 
+        prompt: interiorPrompt 
+      });
 
-  pollImageStatus(res.data.generationId);
-  
-  setMessages((prev) => [...prev, { 
-    role: 'bot', 
-    text: '🏘️ กำลังจำลองการปูลายเซรามิกในห้องจริงให้คุณสักครู่นะครับ...' 
-  }]);
+      pollImageStatus(res.data.generationId);
+      
+      setMessages((prev) => [...prev, { 
+        role: 'bot', 
+        text: '🏘️ กำลังจำลองการปูลายเซรามิกในห้องจริงให้คุณสักครู่นะครับ...' 
+      }]);
 
+    // --- ส่วนที่ 2: ถ้าเป็นการ "พูดคุย/ถามราคา" (Gemini) ---
     } else {
-      // ถ้าไม่ใช่การวาดรูป ให้ส่งไปถาม Gemini (แนะนำลาย/ราคา)
-      const res = await axios.post('https://tile-ai-api.vercel.app/chat', { prompt: currentInput });
+      // เพิ่มข้อมูลราคา (Context) เข้าไปตรงนี้ เพื่อให้บอทฉลาดขึ้น
+      const pricingInstruction = `
+        คุณคือผู้เชี่ยวชาญด้านกระเบื้องเซรามิกของ TileAi 
+        ข้อมูลราคาสำหรับประเมินให้ลูกค้า:
+        - ลายทั่วไป/สีพื้น: 150-250 บาท/ตร.ม.
+        - ลายไม้/ลายหินอ่อน: 350-550 บาท/ตร.ม.
+        - ลายพรีเมียม/ลายไทยเบญจรงค์: 800-1,500 บาท/ตร.ม.
+        - ค่าแรงปูพื้น: 200-300 บาท/ตร.ม.
+        คำแนะนำ: ตอบอย่างสุภาพ ถ้าลูกค้าถามราคาให้ลองคำนวณคร่าวๆ ให้เขาด้วย
+      `;
+
+      // ส่งทั้งคำสั่งราคา และ สิ่งที่ลูกค้าพิมพ์ไปหา Gemini
+      const res = await axios.post('https://tile-ai-api.vercel.app/chat', { 
+        prompt: pricingInstruction + "\n\nลูกค้าถามว่า: " + currentInput 
+      });
+      
       setMessages((prev) => [...prev, { role: 'bot', text: res.data.text }]);
     }
+
   } catch (err) {
     console.error(err);
     setMessages((prev) => [...prev, { role: 'bot', text: 'ขออภัยครับ เกิดข้อผิดพลาดในการเชื่อมต่อ' }]);
   }
 };
+
 const downloadImage = async (imageUrl) => {
   try {
     const response = await fetch(imageUrl);
