@@ -42,19 +42,25 @@ function App() {
   try {
     // --- จุดที่แก้ไข: ปรับเงื่อนไขให้เข้ากับเว็บเซรามิก ---
     if (
-      currentInput.includes("วาด") || 
-      currentInput.includes("ออกแบบ") || 
-      currentInput.includes("ดูลาย") ||
-      currentInput.includes("ขอดูรูป")
-    ) {
-      // ส่งไปที่ API วาดรูป
-      const res = await axios.post('https://tile-ai-api.vercel.app/generate-image', { prompt: currentInput });
-      pollImageStatus(res.data.generationId);
-      
-      setMessages((prev) => [...prev, { 
-        role: 'bot', 
-        text: '🎨 กำลังออกแบบลายเซรามิกให้คุณสักครู่นะครับ...' 
-      }]);
+  currentInput.includes("วาด") || 
+  currentInput.includes("ออกแบบ") || 
+  currentInput.includes("ดูลาย") ||
+  currentInput.includes("ขอดูรูป")
+) {
+  // 1. สร้างคำสั่งใหม่ที่ "บังคับ" ให้ AI วาดรูปห้อง
+  const interiorPrompt = `Photorealistic interior view of a modern empty room, the floor is fully covered with seamless ${currentInput} ceramic tiles, 8k resolution, architectural photography, bright natural lighting, highly detailed floor texture`;
+
+  // 2. ส่ง interiorPrompt ไปที่ API แทนที่ currentInput เดิม
+  const res = await axios.post('https://tile-ai-api.vercel.app/generate-image', { 
+    prompt: interiorPrompt 
+  });
+
+  pollImageStatus(res.data.generationId);
+  
+  setMessages((prev) => [...prev, { 
+    role: 'bot', 
+    text: '🏘️ กำลังจำลองการปูลายเซรามิกในห้องจริงให้คุณสักครู่นะครับ...' 
+  }]);
 
     } else {
       // ถ้าไม่ใช่การวาดรูป ให้ส่งไปถาม Gemini (แนะนำลาย/ราคา)
